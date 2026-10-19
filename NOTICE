@@ -1,0 +1,9 @@
+Zixcel Container Registry
+Copyright 2026 Zixcel contributors
+Licensed under Apache-2.0.
+
+Native protocol, integrity plans and packaging reuse the managed zixcel/cli library.
+The small packaging entry point follows the Apache-2.0 zixcel-wordpress entry point.
+Dependency licenses and notices are retained in native package bundles.
+Docker Hub API interface facts and the legacy delete path are documented with
+vendor source attribution in docs/api-contract.md; no vendor SDK source is copied.
