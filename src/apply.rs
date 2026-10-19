@@ -8,6 +8,7 @@ pub fn apply<T: Transport>(
     digest: &str,
     directory: &Path,
 ) -> Result<Value> {
+    let started = std::time::Instant::now();
     plan.validate(now)?;
     let value = serde_json::to_value(plan).map_err(|_| Error("invalid_plan"))?;
     if zix_operation_contracts::digest(&value) != digest {
@@ -20,9 +21,12 @@ pub fn apply<T: Transport>(
             return Err(Error("state_changed"));
         }
     }
+    hub.transport.ensure_budget(plan.repositories.len() * 2)?;
+    plan.validate(now.saturating_add(started.elapsed().as_secs()))?;
     let mut journal = crate::journal::Journal::begin(directory, digest)?;
     let mut completed = Vec::new();
     for target in &plan.repositories {
+        plan.validate(now.saturating_add(started.elapsed().as_secs()))?;
         let name = &target.repository.name;
         // Vendor-maintained hub-tool route, explicitly pinned in docs/api-contract.md.
         let result = hub

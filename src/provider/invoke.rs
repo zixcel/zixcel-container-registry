@@ -52,6 +52,9 @@ pub(super) fn invoke(request: &Request, binding: &Binding) -> Result<Value> {
     }
     let username = request.arguments.get("username").map(String::as_str);
     let token = zeroize::Zeroizing::new(std::env::var("ZIX_DOCKER_HUB_TOKEN").ok());
+    if request.operation == "docker.delete-apply" && token.is_none() {
+        return Err(Error("credential_missing"));
+    }
     let mut hub = Hub::new(Https::new(username, token.as_deref())?);
     match request.operation.as_str() {
         "docker.list" => Ok(

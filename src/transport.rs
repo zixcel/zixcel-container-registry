@@ -15,6 +15,7 @@ pub struct Reply {
 }
 pub trait Transport {
     fn request(&mut self, method: Method, path: &str) -> Result<Reply>;
+    fn ensure_budget(&self, requests: usize) -> Result<()>;
 }
 pub struct Https {
     client: Client,
@@ -44,6 +45,12 @@ impl Https {
     }
 }
 impl Transport for Https {
+    fn ensure_budget(&self, requests: usize) -> Result<()> {
+        if usize::from(self.remaining) < requests || Instant::now() >= self.deadline {
+            return Err(Error("request_budget"));
+        }
+        Ok(())
+    }
     fn request(&mut self, method: Method, path: &str) -> Result<Reply> {
         if self.remaining == 0 || Instant::now() >= self.deadline {
             return Err(Error("request_budget"));

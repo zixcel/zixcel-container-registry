@@ -4,11 +4,13 @@ use std::collections::VecDeque;
 use zixcel_container_registry::{Error, Method, Reply, Result, Transport};
 pub struct Fake {
     pub replies: VecDeque<(Method, String, Result<Reply>)>,
+    pub budget_failure: bool,
 }
 impl Fake {
     pub fn new() -> Self {
         Self {
             replies: VecDeque::new(),
+            budget_failure: false,
         }
     }
     pub fn push(&mut self, method: Method, path: &str, status: u16, value: Value) {
@@ -41,6 +43,13 @@ impl Fake {
     }
 }
 impl Transport for Fake {
+    fn ensure_budget(&self, _: usize) -> Result<()> {
+        if self.budget_failure {
+            Err(Error("request_budget"))
+        } else {
+            Ok(())
+        }
+    }
     fn request(&mut self, method: Method, path: &str) -> Result<Reply> {
         let (m, p, r) = self
             .replies
