@@ -5,6 +5,14 @@ umask 077
 # Use the installed OS provider; no vault format or key derivation is implemented here.
 task_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 [[ -t 0 && $# == 0 ]] || { echo 'Run interactively without arguments.' >&2; exit 2; }
+# Validate the owner endpoint before asking for the OS password.
+[[ ! -L $task_root/.local ]] || exit 2
+mkdir -p -m 700 "$task_root/.local"
+[[ -O $task_root/.local ]] || exit 2
+chmod 700 "$task_root/.local"
+[[ ! -e $task_root/.local/custody-session.address && ! -L $task_root/.local/custody-session.address ]] || {
+  echo 'An owner session marker exists. Inspect its owning session before starting another.' >&2; exit 2;
+}
 if [[ ${ZIX_DOCKER_OS_SESSION:-} != 1 ]]; then
   if pgrep -u "$(id -u)" -f '(^|/)gnome-keyring-daemon([[:space:]]|$)' >/dev/null; then
     echo 'An OS keyring provider already exists. Use its owning desktop/session; do not open a competing provider.' >&2
