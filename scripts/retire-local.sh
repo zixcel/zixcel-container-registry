@@ -29,6 +29,7 @@ jq '.result.plan' "$operation_directory/response.json" > "$operation_directory/p
 plan_sha256="$(jq -er '.result.sha256' "$operation_directory/response.json")"
 printf 'Private deletion plan: %s\n' "$operation_directory/plan.json" >&2
 jq '.plan | {namespace,expires_at,repositories}' "$operation_directory/plan.json"
+printf 'Reviewed plan SHA256 (copy only after checking the targets): %s\n' "$plan_sha256" >&2
 "$zix_executable" docker repositories delete apply --namespace "$1" \
   --plan-file "$operation_directory/plan.json" --approval-sha256 "$plan_sha256" \
   --journal-directory "$operation_directory/journal" --username "$docker_username" \
