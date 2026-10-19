@@ -1860,7 +1860,7 @@ dependencies = [
 
 [[package]]
 name = "zixcel-container-registry"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "getrandom 0.4.3",
  "reqwest",

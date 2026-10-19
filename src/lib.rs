@@ -1,5 +1,6 @@
 #![forbid(unsafe_code)]
 //! Docker Hub policy belongs here; dispatcher integrity belongs to zix-cli.
+mod absence;
 mod apply;
 mod auth;
 mod client;
@@ -11,6 +12,8 @@ mod pages;
 mod plan;
 pub mod provider;
 mod transport;
+mod transport_error;
+pub use absence::Absence;
 pub use apply::apply;
 pub use client::Hub;
 pub use model::{Repository, Snapshot, Tag};
@@ -28,6 +31,24 @@ pub fn identifier(value: &str) -> Result<()> {
             .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b"._-".contains(&b))
     {
         return Err(Error("invalid_identifier"));
+    }
+    Ok(())
+}
+
+pub(crate) fn validate_targets(namespace: &str, names: &[String]) -> Result<()> {
+    identifier(namespace)?;
+    if names.is_empty()
+        || names.len() > 10
+        || names
+            .iter()
+            .collect::<std::collections::BTreeSet<_>>()
+            .len()
+            != names.len()
+    {
+        return Err(Error("invalid_input"));
+    }
+    for name in names {
+        identifier(name)?;
     }
     Ok(())
 }

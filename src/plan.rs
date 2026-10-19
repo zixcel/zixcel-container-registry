@@ -39,17 +39,7 @@ pub fn plan<T: Transport>(
     names: &[String],
     now: u64,
 ) -> Result<DeletePlan> {
-    crate::identifier(namespace)?;
-    if names.is_empty()
-        || names.len() > 10
-        || names.iter().collect::<BTreeSet<_>>().len() != names.len()
-    {
-        return Err(Error("invalid_input"));
-    }
-    // Validate every target before the first network request.
-    for name in names {
-        crate::identifier(name)?;
-    }
+    crate::validate_targets(namespace, names)?;
     let mut repositories = Vec::new();
     for name in names {
         repositories.push(hub.snapshot(namespace, name)?);

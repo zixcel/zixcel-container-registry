@@ -5,7 +5,7 @@ use zixcel_container_registry::{manifest, provider::Request};
 fn manifest_and_request_share_exact_write_policy() {
     let m = manifest::manifest().unwrap();
     m.validate().unwrap();
-    assert_eq!(m.commands.len(), 5);
+    assert_eq!(m.commands.len(), 6);
     let write = m
         .commands
         .iter()
@@ -15,7 +15,7 @@ fn manifest_and_request_share_exact_write_policy() {
     assert_eq!(write[0].id, "docker.delete-apply");
     let binding = Binding::for_catalog(
         "zixcel-container-registry",
-        "0.1.0",
+        env!("CARGO_PKG_VERSION"),
         &manifest::catalog().unwrap(),
         &"a".repeat(64),
     );

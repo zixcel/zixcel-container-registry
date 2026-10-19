@@ -44,6 +44,11 @@ token; without that argument it must already be a Hub bearer token. Authenticati
 errors do not trigger a login prompt or alternate credential discovery. Existing
 PAT permissions determine access; the tool does not create tokens or change roles.
 
+Use `zix docker repositories verify-absent --namespace example --repositories old-one,old-two`
+for independent read-only observations. It does not send DELETE, recreate a plan,
+or turn an unrelated 404 into proof that a write was accepted. The CLI returning
+an accepted result is distinct from its `state` being `complete`; check the state.
+
 ## Boundaries and verification
 
 - HTTPS is fixed to hub.docker.com; redirects, proxies and automatic retries are
@@ -54,8 +59,11 @@ PAT permissions determine access; the tool does not create tokens or change role
 - All targets are re-observed before the first DELETE. A private durable one-use
   journal is written first. A failed/unknown write cannot be replayed with that
   plan. Reconcile using read operations; never blindly rerun an unknown write.
-- A successful deletion requires a successful DELETE response and a subsequent
-  scoped 404. A standalone 404 is not proof that an account, workload or repository
+- Acknowledgement is durably recorded before readback. All distinct approved
+  targets are submitted once, then observed. A 2xx response with a still-visible
+  repository returns `verification_pending`, not a false complete or an instruction
+  to resend. The helper makes at most six additional read-only observations.
+- Completed deletion requires a successful DELETE response and a later scoped 404. A standalone 404 is not proof that an account, workload or repository
   has been retired. This cannot remove externally cached/pulled image bytes.
 - Hub provides no atomic batch or compare-and-delete guarantee. Remote changes
   after preflight can race deletion. Stop repository writers before retirement.
