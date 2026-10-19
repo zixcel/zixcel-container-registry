@@ -12,7 +12,13 @@ if [[ ! -x "$zix_executable" ]]; then
   exit 2
 fi
 command -v jq >/dev/null
-"$zix_executable" describe docker --format json >/dev/null
+if ! "$zix_executable" describe docker --format json | jq -e '
+  .package == "zixcel-container-registry" and
+  any(.commands[]; .id == "docker.verify-absent" and .effect == "read")
+' >/dev/null; then
+  echo 'Install the accepted provider with verify-absent capability before supplying credentials.' >&2
+  exit 2
+fi
 operation_directory="$(mktemp -d "${TMPDIR:-/tmp}/zix-docker-retirement.XXXXXXXX")"
 chmod 700 "$operation_directory"
 install -d -m 700 "$operation_directory/journal"
