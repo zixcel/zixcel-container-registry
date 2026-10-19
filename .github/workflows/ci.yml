@@ -4,6 +4,9 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
@@ -22,6 +25,14 @@ jobs:
       - run: cargo test --locked --all-targets
       - run: cargo clippy --locked --all-targets -- -D warnings
       - run: bash -n scripts/retire-local.sh
+      - name: Verify native package and dependency notices
+        env:
+          ZIX_RELEASE_SOURCE: ${{ github.sha }}
+        run: |
+          strip --strip-debug target/debug/zix-docker
+          cargo run --locked --bin zix-docker-package -- target/debug/zix-docker package-check x86_64-unknown-linux-gnu
+          (cd package-check && sha256sum --check SHA256SUMS)
+          (cd package-check/$(find package-check -mindepth 1 -maxdepth 1 -type d -printf '%f\n') && sha256sum --check CONTENTS.sha256)
   dependency-audit:
     runs-on: ubuntu-24.04
     timeout-minutes: 15

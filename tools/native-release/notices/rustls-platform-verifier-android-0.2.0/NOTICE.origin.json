@@ -1,0 +1,20 @@
+{
+  "package": "rustls-platform-verifier-android",
+  "version": "0.2.0",
+  "repository": "https://github.com/rustls/rustls-platform-verifier",
+  "sourceCommit": "252e25161a91af476cbea620e29d277592d27ec7",
+  "basis": "Android published crate declares MIT OR Apache-2.0 but omits license files and VCS metadata. Retain upstream license texts from resolved parent rustls-platform-verifier 0.7.1 VCS revision. This is license provenance, not Android AAR reproducibility evidence. Upstream android-release-support/Cargo.toml at this revision confirms version 0.2.0.",
+  "files": [
+    {
+      "file": "LICENSE-MIT",
+      "url": "https://raw.githubusercontent.com/rustls/rustls-platform-verifier/252e25161a91af476cbea620e29d277592d27ec7/LICENSE-MIT",
+      "sha256": "1c7cf76689c837a68ed8d704994e52a0f2940c087958f860d17f3186afbdcc0c"
+    },
+    {
+      "file": "LICENSE-APACHE",
+      "url": "https://raw.githubusercontent.com/rustls/rustls-platform-verifier/252e25161a91af476cbea620e29d277592d27ec7/LICENSE-APACHE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    }
+  ],
+  "manifestUrl": "https://raw.githubusercontent.com/rustls/rustls-platform-verifier/252e25161a91af476cbea620e29d277592d27ec7/android-release-support/Cargo.toml"
+}
