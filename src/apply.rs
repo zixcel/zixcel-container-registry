@@ -28,6 +28,7 @@ pub fn apply<T: Transport>(
     for target in &plan.repositories {
         plan.validate(now.saturating_add(started.elapsed().as_secs()))?;
         let name = &target.repository.name;
+        journal.update(&json!({"state":"pending_do_not_replay","namespace":plan.namespace,"pending":name,"deleted":completed,"plan_sha256":digest}))?;
         // Vendor-maintained hub-tool route, explicitly pinned in docs/api-contract.md.
         let result = hub
             .transport
@@ -37,7 +38,8 @@ pub fn apply<T: Transport>(
             )
             .map_err(|_| Error("unknown_result"))?;
         if ![200, 202, 204].contains(&result.status) {
-            return Err(Error("unknown_result"));
+            journal.update(&json!({"state":"rejected_do_not_replay","namespace":plan.namespace,"pending":name,"deleted":completed,"http_status":result.status,"plan_sha256":digest}))?;
+            return Err(Error("delete_rejected"));
         }
         if hub
             .repository(&plan.namespace, name)

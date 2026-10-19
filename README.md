@@ -1,7 +1,10 @@
 # Zixcel Container Registry
 
 Docker Hub repository observations and explicit local retirement, as the `docker`
-extension of [Zix](https://github.com/zixcel/cli). Rust library and native CLI share
+extension of [Zix](https://github.com/zixcel/cli). V2 manifests require the
+operator-write dispatcher prepared as 0.2.1 or newer; the 0.2.0 release cannot
+install this extension. Verify that both accepted releases exist before installing.
+Rust library and native CLI share
 the same scope, pagination and deletion policy. No Docker daemon is needed.
 
 ```sh

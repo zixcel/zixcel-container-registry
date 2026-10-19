@@ -8,7 +8,7 @@ if [[ $# != 2 || ! -t 0 ]]; then
 fi
 zix_executable="${ZIX_BIN:-$(command -v zix || true)}"
 if [[ ! -x "$zix_executable" ]]; then
-  echo 'Select an accepted zix 0.2+ dispatcher using ZIX_BIN; no implicit installation.' >&2
+  echo 'Select an accepted zix 0.2.1+ dispatcher using ZIX_BIN; no implicit installation.' >&2
   exit 2
 fi
 command -v jq >/dev/null

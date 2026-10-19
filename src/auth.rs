@@ -22,8 +22,12 @@ pub(crate) fn authorization(
                 .body(payload.to_vec())
                 .send()
                 .map_err(|_| Error("authentication_failed"))?;
-            if response.status().as_u16() != 200 {
-                return Err(Error("authentication_failed"));
+            match response.status().as_u16() {
+                200 => {}
+                401 => return Err(Error("auth_required")),
+                403 => return Err(Error("authentication_forbidden")),
+                429 => return Err(Error("rate_limited")),
+                _ => return Err(Error("authentication_http_failed")),
             }
             let mut bytes = Zeroizing::new(Vec::new());
             response
