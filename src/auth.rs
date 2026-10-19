@@ -57,7 +57,7 @@ pub(crate) fn authorization(
 
     Ok(None)
 }
-fn valid_secret(token: &str) -> Result<()> {
+pub(crate) fn valid_secret(token: &str) -> Result<()> {
     if token.is_empty() || token.len() > 8192 || !token.bytes().all(|b| b.is_ascii_graphic()) {
         return Err(Error("invalid_credential"));
     }

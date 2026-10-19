@@ -44,6 +44,19 @@ token; without that argument it must already be a Hub bearer token. Authenticati
 errors do not trigger a login prompt or alternate credential discovery. Existing
 PAT permissions determine access; the tool does not create tokens or change roles.
 
+For repeated local operations, explicitly select a persistent OS collection with
+`--username LOGIN --collection default`. The native provider uses the published
+`crowsi-credential-broker` and GNOME's official Rust `libsecret` binding. PAT bytes
+stay in the selected OS keyring; no custom vault, encryption or master-password
+format is implemented. Namespace, username, provider origin and audience bind
+lookup and one-use credential leases. A locked/unavailable/missing selection fails
+closed, with no anonymous or environment-secret fallback. Supplying both a
+collection and `ZIX_DOCKER_HUB_TOKEN` is rejected.
+
+[Local custody setup](docs/local-custody.md) explains first-time import and session
+unlock. Source support is distinct from a published native package. Never rerun a
+retirement to test credential storage; use repository listing instead.
+
 Use `zix docker repositories verify-absent --namespace example --repositories old-one,old-two`
 for independent read-only observations. It does not send DELETE, recreate a plan,
 or turn an unrelated 404 into proof that a write was accepted. The CLI returning

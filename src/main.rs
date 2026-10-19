@@ -8,6 +8,11 @@ fn main() -> ExitCode {
         return ExitCode::SUCCESS;
     } else if args == ["--zix-provider-v1"] {
         zixcel_container_registry::provider::run()
+    } else if args
+        .first()
+        .is_some_and(|arg| arg.starts_with("credential-"))
+    {
+        zixcel_container_registry::credential_command::run(&args)
     } else {
         Err(zixcel_container_registry::Error("invalid_arguments"))
     };

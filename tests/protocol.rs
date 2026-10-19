@@ -68,3 +68,42 @@ fn executable_does_not_echo_invalid_credentials_or_raw_protocol_input() {
     assert!(!String::from_utf8_lossy(&r.stderr).contains("SYNTHETIC_SECRET"));
     assert!(r.stdout.is_empty());
 }
+
+#[test]
+fn explicit_custody_rejects_environment_secret_before_connecting_or_echoing() {
+    use std::{
+        io::Write,
+        process::{Command, Stdio},
+    };
+    let exe = env!("CARGO_BIN_EXE_zix-docker");
+    let binding = Binding::for_catalog(
+        "zixcel-container-registry",
+        env!("CARGO_PKG_VERSION"),
+        &manifest::catalog().unwrap(),
+        &zix_cli::files::digest(&std::fs::read(exe).unwrap()),
+    );
+    let value = json!({"schema":"zix-provider/v1","id":"a".repeat(32),"operation":"docker.list",
+        "arguments":{"namespace":"example","username":"example-user","collection":"default"},
+        "limits":{"timeout_ms":40000,"maximum_response_bytes":131072},"binding":binding});
+    let mut child = Command::new(exe)
+        .arg("--zix-provider-v1")
+        .env_clear()
+        .env("ZIX_DOCKER_HUB_TOKEN", "SYNTHETIC_DO_NOT_ECHO")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .unwrap();
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(&serde_json::to_vec(&value).unwrap())
+        .unwrap();
+    let output = child.wait_with_output().unwrap();
+    let result: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(result["error"], "ambiguous_credential_source");
+    for bytes in [&output.stdout, &output.stderr] {
+        assert!(!String::from_utf8_lossy(bytes).contains("SYNTHETIC_DO_NOT_ECHO"));
+    }
+}

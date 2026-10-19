@@ -34,6 +34,7 @@ pub fn manifest() -> Result<Manifest> {
         let mut args = vec![
             json!({"name":"namespace","required":true,"maximum":100}),
             json!({"name":"username","required":false,"maximum":100}),
+            json!({"name":"collection","required":false,"maximum":64}),
         ];
         for name in extra {
             args.push(json!({"name":name,"required":true,"maximum":if name=="approval-sha256"{64}else{2048}}));
@@ -43,7 +44,7 @@ pub fn manifest() -> Result<Manifest> {
             "required_permissions":[if effect=="read"{"hub:repository:read"}else{"hub:repository:delete"}],"arguments":args}));
     }
     let value = json!({"schema":"zix-extension/v2","package":env!("CARGO_PKG_NAME"),"version":env!("CARGO_PKG_VERSION"),"namespace":"docker",
-        "platform":"linux-x86_64","protocol":"zix-provider/v1","credential_environment":["ZIX_DOCKER_HUB_TOKEN"],"runtime_environment":[],"timeout_ms":40000,"commands":commands});
+        "platform":"linux-x86_64","protocol":"zix-provider/v1","credential_environment":["ZIX_DOCKER_HUB_TOKEN"],"runtime_environment":["DBUS_SESSION_BUS_ADDRESS"],"timeout_ms":40000,"commands":commands});
     let manifest: Manifest =
         serde_json::from_value(value).map_err(|_| crate::Error("invalid_manifest"))?;
     manifest.validate()?;
@@ -56,7 +57,7 @@ pub fn binding() -> Result<zix_operation_contracts::Binding> {
     let bytes = zix_cli::files::bounded(
         std::fs::File::open("/proc/self/exe")
             .map_err(|_| crate::Error("executable_unavailable"))?,
-        67108864,
+        128 * 1024 * 1024,
     )?;
     Ok(zix_operation_contracts::Binding::for_catalog(
         env!("CARGO_PKG_NAME"),

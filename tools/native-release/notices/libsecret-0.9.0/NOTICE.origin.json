@@ -1,0 +1,9 @@
+{
+  "package": "libsecret",
+  "version": "0.9.0",
+  "license": "MIT",
+  "upstream_commit": "7e6720f87b61cbc832b4ca998211d7c499df32a0",
+  "upstream_license_url": "https://gitlab.gnome.org/World/Rust/libsecret-rs/-/raw/7e6720f87b61cbc832b4ca998211d7c499df32a0/LICENSE",
+  "sha256": "b1e7e11b32bc5b78547a0d102ec2680113e7be64ddb4e9bacb39e9c374eba0ce",
+  "reason": "published crate omits repository root license; retained unchanged from exact upstream commit"
+}
