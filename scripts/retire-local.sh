@@ -2,8 +2,8 @@
 set -euo pipefail
 set +x
 umask 077
-if [[ $# != 2 || ! -t 0 ]]; then
-  echo 'usage: bash scripts/retire-local.sh NAMESPACE REPOSITORY,REPOSITORY (interactive terminal)' >&2
+if [[ ( $# != 2 && $# != 5 ) || ! -t 0 ]]; then
+  echo 'usage: bash scripts/retire-local.sh NAMESPACE REPOSITORY,REPOSITORY [--custody USER COLLECTION] (interactive terminal)' >&2
   exit 2
 fi
 zix_executable="${ZIX_BIN:-$(command -v zix || true)}"
@@ -24,12 +24,24 @@ chmod 700 "$operation_directory"
 install -d -m 700 "$operation_directory/journal"
 trap 'unset ZIX_DOCKER_HUB_TOKEN' EXIT
 trap 'printf "Stopped. Inspect private receipts in %s; do not replay writes.\n" "$operation_directory" >&2' ERR
-read -rp 'Docker Hub login username: ' docker_username
-read -rsp 'Existing Docker Hub PAT (not saved): ' ZIX_DOCKER_HUB_TOKEN
-printf '\n' >&2
-export ZIX_DOCKER_HUB_TOKEN
+auth=()
+if [[ $# == 5 ]]; then
+  [[ $3 == --custody && -z ${ZIX_DOCKER_HUB_TOKEN:-} ]] || exit 2
+  "$zix_executable" describe docker --format json | jq -e '
+    .runtime_environment == ["DBUS_SESSION_BUS_ADDRESS"] and
+    all(.commands[]; any(.arguments[]; .name == "collection"))
+  ' >/dev/null
+  source "$(dirname -- "${BASH_SOURCE[0]}")/custody-session.sh"
+  auth=(--username "$4" --collection "$5")
+else
+  read -rp 'Docker Hub login username: ' docker_username
+  read -rsp 'Existing Docker Hub PAT (not saved): ' ZIX_DOCKER_HUB_TOKEN
+  printf '\n' >&2
+  export ZIX_DOCKER_HUB_TOKEN
+  auth=(--username "$docker_username")
+fi
 "$zix_executable" docker repositories delete plan --namespace "$1" \
-  --repositories "$2" --username "$docker_username" > "$operation_directory/response.json"
+  --repositories "$2" "${auth[@]}" > "$operation_directory/response.json"
 jq -e '.result.plan.schema == "zix-local-operation/v1" and (.result.sha256 | test("^[a-f0-9]{64}$"))' "$operation_directory/response.json" >/dev/null
 jq '.result.plan' "$operation_directory/response.json" > "$operation_directory/plan.json"
 plan_sha256="$(jq -er '.result.sha256' "$operation_directory/response.json")"
@@ -38,7 +50,7 @@ jq '.plan | {namespace,expires_at,repositories}' "$operation_directory/plan.json
 printf 'Reviewed plan SHA256 (copy only after checking the targets): %s\n' "$plan_sha256" >&2
 "$zix_executable" docker repositories delete apply --namespace "$1" \
   --plan-file "$operation_directory/plan.json" --approval-sha256 "$plan_sha256" \
-  --journal-directory "$operation_directory/journal" --username "$docker_username" \
+  --journal-directory "$operation_directory/journal" "${auth[@]}" \
   > "$operation_directory/result.json"
 state="$(jq -er '.result.state' "$operation_directory/result.json")"
 if [[ "$state" == verification_pending ]]; then
@@ -48,7 +60,7 @@ if [[ "$state" == verification_pending ]]; then
     sleep 2
     observation="$operation_directory/verification-$attempt.json"
     "$zix_executable" docker repositories verify-absent --namespace "$1" \
-      --repositories "$2" --username "$docker_username" > "$observation"
+      --repositories "$2" "${auth[@]}" > "$observation"
     if jq -e --slurpfile plan "$operation_directory/plan.json" '
       .result as $r | ($plan[0].plan.repositories | map(.repository.name) | sort) as $wanted |
       $r.namespace == $plan[0].plan.namespace and $r.all_observed_absent == true and

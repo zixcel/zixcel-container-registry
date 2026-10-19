@@ -6,7 +6,11 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 use zix_operation_contracts::{Binding, LocalPlan};
-pub(super) fn invoke(request: &Request, binding: &Binding) -> Result<Value> {
+pub(super) fn invoke(
+    request: &Request,
+    binding: &Binding,
+    secrets: &mut Vec<String>,
+) -> Result<Value> {
     let get = |name: &str| {
         request
             .arguments
@@ -50,9 +54,17 @@ pub(super) fn invoke(request: &Request, binding: &Binding) -> Result<Value> {
         approved = Some((inner, zix_operation_contracts::digest(&p.plan)));
     }
     let username = request.arguments.get("username").map(String::as_str);
-    let token = zeroize::Zeroizing::new(std::env::var("ZIX_DOCKER_HUB_TOKEN").ok());
+    let token = crate::credential_source::load(
+        namespace,
+        username,
+        request.arguments.get("collection").map(String::as_str),
+        &request.operation,
+    )?;
     if request.operation == "docker.delete-apply" && token.is_none() {
         return Err(Error("credential_missing"));
+    }
+    if let Some(secret) = token.as_deref() {
+        secrets.push(secret.to_owned());
     }
     let mut hub = Hub::new(Https::new(username, token.as_deref())?);
     match request.operation.as_str() {

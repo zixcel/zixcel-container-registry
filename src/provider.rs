@@ -56,16 +56,16 @@ pub fn run() -> Result<Value> {
     request.validate(&binding)?;
     let mut response =
         json!({"schema":"zix-provider/v1","id":request.id,"operation":request.operation});
-    match invoke::invoke(&request, &binding) {
-        Ok(value) => response["result"] = value,
-        Err(error) => response["error"] = json!(error.0),
-    }
-    let tokens = zeroize::Zeroizing::new(
+    let mut tokens = zeroize::Zeroizing::new(
         std::env::var("ZIX_DOCKER_HUB_TOKEN")
             .ok()
             .into_iter()
             .collect::<Vec<_>>(),
     );
+    match invoke::invoke(&request, &binding, &mut tokens) {
+        Ok(value) => response["result"] = value,
+        Err(error) => response["error"] = json!(error.0),
+    }
     if zix_cli::response::contains_secret(&response, &tokens) {
         return Err(Error("credential_rejected"));
     }
