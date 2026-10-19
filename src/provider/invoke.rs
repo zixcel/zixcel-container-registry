@@ -20,9 +20,8 @@ pub(super) fn invoke(request: &Request, binding: &Binding) -> Result<Value> {
         crate::identifier(name)?;
     }
     if let Some(names) = request.arguments.get("repositories") {
-        for name in names.split(',') {
-            crate::identifier(name)?;
-        }
+        let targets = names.split(',').map(str::to_owned).collect::<Vec<_>>();
+        crate::validate_targets(namespace, &targets)?;
     }
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -65,6 +64,14 @@ pub(super) fn invoke(request: &Request, binding: &Binding) -> Result<Value> {
         ),
         "docker.tags" => {
             Ok(json!({"snapshot":hub.snapshot(namespace,get("repository")?)?,"complete":true}))
+        }
+        "docker.verify-absent" => {
+            let names = get("repositories")?
+                .split(',')
+                .map(str::to_owned)
+                .collect::<Vec<_>>();
+            serde_json::to_value(hub.observe_absence(namespace, &names)?)
+                .map_err(|_| Error("invalid_response"))
         }
         "docker.delete-plan" => {
             let names = get("repositories")?

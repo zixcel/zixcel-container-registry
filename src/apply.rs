@@ -24,34 +24,43 @@ pub fn apply<T: Transport>(
     hub.transport.ensure_budget(plan.repositories.len() * 2)?;
     plan.validate(now.saturating_add(started.elapsed().as_secs()))?;
     let mut journal = crate::journal::Journal::begin(directory, digest)?;
-    let mut completed = Vec::new();
+    let mut accepted = Vec::new();
     for target in &plan.repositories {
         plan.validate(now.saturating_add(started.elapsed().as_secs()))?;
         let name = &target.repository.name;
-        journal.update(&json!({"state":"pending_do_not_replay","namespace":plan.namespace,"pending":name,"deleted":completed,"plan_sha256":digest}))?;
-        // Vendor-maintained hub-tool route, explicitly pinned in docs/api-contract.md.
-        let result = hub
-            .transport
-            .request(
-                Method::Delete,
-                &format!("/v2/repositories/{}/{name}/", plan.namespace),
-            )
-            .map_err(|_| Error("unknown_result"))?;
+        journal.update(&json!({"state":"pending_do_not_replay","namespace":plan.namespace,"pending":name,"accepted":accepted,"plan_sha256":digest}))?;
+        let result = match hub.transport.request(
+            Method::Delete,
+            &format!("/v2/repositories/{}/{name}/", plan.namespace),
+        ) {
+            Ok(r) => r,
+            Err(error) => {
+                journal.update(&json!({"state":"unknown_do_not_replay","namespace":plan.namespace,"pending":name,"accepted":accepted,"error_kind":crate::transport_error::label(error),"plan_sha256":digest}))?;
+                return Err(Error("unknown_result"));
+            }
+        };
         if ![200, 202, 204].contains(&result.status) {
-            journal.update(&json!({"state":"rejected_do_not_replay","namespace":plan.namespace,"pending":name,"deleted":completed,"http_status":result.status,"plan_sha256":digest}))?;
+            journal.update(&json!({"state":"rejected_do_not_replay","namespace":plan.namespace,"pending":name,"accepted":accepted,"http_status":result.status,"plan_sha256":digest}))?;
             return Err(Error("delete_rejected"));
         }
-        if hub
-            .repository(&plan.namespace, name)
-            .map_err(|_| Error("unknown_result"))?
-            .is_some()
-        {
-            return Err(Error("unknown_result"));
-        }
-        completed.push(name);
-        journal.update(&json!({"state":"partial_do_not_replay","namespace":plan.namespace,"deleted":completed,"plan_sha256":digest}))?;
+        accepted.push(json!({"repository":name,"http_status":result.status}));
+        // Persist acknowledgement before observing absence or sending the next distinct deletion.
+        journal.update(&json!({"state":"acknowledged_do_not_replay","namespace":plan.namespace,"accepted":accepted,"plan_sha256":digest}))?;
     }
-    let receipt = json!({"state":"complete","namespace":plan.namespace,"deleted":completed,"plan_sha256":digest,"verified_absent":true});
+    let names = plan
+        .repositories
+        .iter()
+        .map(|s| s.repository.name.clone())
+        .collect::<Vec<_>>();
+    let observed = match hub.observe_absence(&plan.namespace, &names) {
+        Ok(value) => Some(value),
+        Err(error) => {
+            journal.update(&json!({"state":"verification_pending","namespace":plan.namespace,"accepted":accepted,"read_error_kind":crate::transport_error::label(error),"plan_sha256":digest}))?;
+            None
+        }
+    };
+    let verified = observed.as_ref().is_some_and(|o| o.all_observed_absent);
+    let receipt = json!({"state":if verified {"complete"}else{"verification_pending"},"namespace":plan.namespace,"accepted":accepted,"observed":observed,"plan_sha256":digest,"verified_absent":verified});
     journal.update(&receipt)?;
     Ok(receipt)
 }

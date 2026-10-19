@@ -70,6 +70,8 @@ impl Transport for Https {
         let mut request = self
             .client
             .request(verb, format!("https://hub.docker.com{path}"))
+            .header("Cache-Control", "no-cache")
+            .header("Pragma", "no-cache")
             .timeout(
                 self.deadline
                     .saturating_duration_since(Instant::now())
@@ -80,8 +82,15 @@ impl Transport for Https {
         } else if method == Method::Delete {
             return Err(Error("credential_missing"));
         }
-        let response = request.send().map_err(|_| Error("transport_failed"))?;
+        let response = request.send().map_err(crate::transport_error::classify)?;
         let status = response.status().as_u16();
+        // A known DELETE status must not be lost to reading an unused response body.
+        if method == Method::Delete || status != 200 {
+            return Ok(Reply {
+                status,
+                body: Vec::new(),
+            });
+        }
         let mut body = Vec::new();
         response
             .take(1048577)

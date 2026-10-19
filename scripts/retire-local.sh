@@ -34,5 +34,33 @@ printf 'Reviewed plan SHA256 (copy only after checking the targets): %s\n' "$pla
   --plan-file "$operation_directory/plan.json" --approval-sha256 "$plan_sha256" \
   --journal-directory "$operation_directory/journal" --username "$docker_username" \
   > "$operation_directory/result.json"
-jq -e '.result.state == "complete" and .result.verified_absent == true' "$operation_directory/result.json" >/dev/null
-printf 'Deletion accepted; private receipt: %s; token discarded on exit.\n' "$operation_directory/result.json"
+state="$(jq -er '.result.state' "$operation_directory/result.json")"
+if [[ "$state" == verification_pending ]]; then
+  printf 'Deletion acknowledged; waiting for read-only confirmation. No DELETE will be repeated.\n' >&2
+  verified=false
+  for attempt in 1 2 3 4 5 6; do
+    sleep 2
+    observation="$operation_directory/verification-$attempt.json"
+    "$zix_executable" docker repositories verify-absent --namespace "$1" \
+      --repositories "$2" --username "$docker_username" > "$observation"
+    if jq -e --slurpfile plan "$operation_directory/plan.json" '
+      .result as $r | ($plan[0].plan.repositories | map(.repository.name) | sort) as $wanted |
+      $r.namespace == $plan[0].plan.namespace and $r.all_observed_absent == true and
+      ($r.present | length) == 0 and ($r.observed_absent | sort) == $wanted
+    ' "$observation" >/dev/null; then
+      jq -n --slurpfile acknowledged "$operation_directory/result.json" --slurpfile observed "$observation" \
+        '{state:"complete",acknowledged:$acknowledged[0].result,read_only_verification:$observed[0].result}' \
+        > "$operation_directory/confirmed.json"
+      verified=true
+      break
+    fi
+  done
+  if [[ "$verified" != true ]]; then
+    printf 'Deletion acknowledged; verification pending. Do not resend writes. Receipt directory: %s\n' "$operation_directory" >&2
+    exit 2
+  fi
+elif [[ "$state" != complete ]]; then
+  printf 'Unexpected result; inspect private receipt without replay.\n' >&2
+  exit 2
+fi
+printf 'Deletion accepted and readback verified; private receipt directory: %s; token discarded on exit.\n' "$operation_directory"

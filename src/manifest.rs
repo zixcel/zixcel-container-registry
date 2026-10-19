@@ -13,6 +13,12 @@ pub fn manifest() -> Result<Manifest> {
         ),
         ("tags", vec!["tags", "list"], vec!["repository"], "read"),
         (
+            "verify-absent",
+            vec!["repositories", "verify-absent"],
+            vec!["repositories"],
+            "read",
+        ),
+        (
             "delete-plan",
             vec!["repositories", "delete", "plan"],
             vec!["repositories"],
@@ -33,7 +39,7 @@ pub fn manifest() -> Result<Manifest> {
             args.push(json!({"name":name,"required":true,"maximum":if name=="approval-sha256"{64}else{2048}}));
         }
         commands.push(json!({"id":format!("docker.{id}"),"words":words,"effect":effect,
-            "description":if effect=="read"{"Bounded Docker Hub observation; planning does not delete."}else{"Operator-approved repository deletion; exact state and one-use journal required."},
+            "description":if effect=="read"{"Bounded Docker Hub observation; planning does not delete."}else{"Operator-approved DELETE; verification_pending requires read-only verify-absent. No replay."},
             "required_permissions":[if effect=="read"{"hub:repository:read"}else{"hub:repository:delete"}],"arguments":args}));
     }
     let value = json!({"schema":"zix-extension/v2","package":env!("CARGO_PKG_NAME"),"version":env!("CARGO_PKG_VERSION"),"namespace":"docker",
