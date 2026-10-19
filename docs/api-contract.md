@@ -22,7 +22,7 @@ The documented official Web fallback is
 HTTP 401/403 is auth_required, 429 is rate_limited; redirects, malformed JSON,
 identity mismatch, incomplete pagination, and changed state fail closed. Reads
 do not retry either; users may explicitly start a fresh observation. This is not
-the broader retry/challenge/OCI inventory acceptance of management issue #161.
+the broader retry/challenge/OCI inventory acceptance.
 
 Protocol, manifest and plan contracts reuse zixcel/cli revision
 f03584c875069187339f164b1c2d684e98b00bc0. No arbitrary API specification can enable

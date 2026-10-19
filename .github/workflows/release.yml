@@ -51,7 +51,7 @@ jobs:
           cargo fmt --all --check
           cargo test --locked --workspace --all-targets --all-features
           cargo clippy --locked --workspace --all-targets --all-features -- -D warnings
-      - name: Build Linux package with OS custody and retain dependency notices
+      - name: Build native provider and retain dependency notices
         run: |
           set -euo pipefail
           cargo build --locked --release --bin zix-docker --target x86_64-unknown-linux-gnu
