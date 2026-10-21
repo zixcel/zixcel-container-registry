@@ -92,17 +92,9 @@ impl<T: Transport> Hub<T> {
                 item.tags.push(tag);
             }
             item.tags.sort_by(|a, b| a.name.cmp(&b.name));
-            if item.state != State::Complete
-                || item.tags.iter().any(|t| {
-                    t.oci
-                        .as_ref()
-                        .is_some_and(|m| limits.oci && m.state != State::Complete)
-                })
-            {
-                if snapshot.state == State::Complete {
-                    snapshot.state = State::Partial;
-                    snapshot.reason = Some("incomplete_repository".into());
-                }
+            if item.state != State::Complete && snapshot.state == State::Complete {
+                snapshot.state = State::Partial;
+                snapshot.reason = Some("incomplete_repository".into());
             }
             snapshot.repositories.push(item);
         }
