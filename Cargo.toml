@@ -1,6 +1,6 @@
 [package]
 name = "zixcel-container-registry"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 rust-version = "1.97"
 license = "Apache-2.0"
@@ -11,8 +11,8 @@ categories = ["command-line-utilities", "development-tools"]
 publish = false
 
 [dependencies]
-zix-cli = { git = "https://github.com/zixcel/cli", rev = "f03584c875069187339f164b1c2d684e98b00bc0" }
-zix-operation-contracts = { git = "https://github.com/zixcel/cli", rev = "f03584c875069187339f164b1c2d684e98b00bc0" }
+zix-cli = { git = "https://github.com/zixcel/cli", rev = "7fe5789b4beb0948bc58c559de8a560eb8a65794" }
+zix-operation-contracts = { git = "https://github.com/zixcel/cli", rev = "7fe5789b4beb0948bc58c559de8a560eb8a65794" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 reqwest = { version = "0.13.3", default-features = false, features = ["blocking", "rustls", "json"] }
