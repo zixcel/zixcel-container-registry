@@ -9,6 +9,7 @@ pub(super) fn validate(value: &PublicSnapshot) -> Result<()> {
         || parts[0] != "0"
         || parts[1] != "2"
         || parts[2].is_empty()
+        || parts[2].len() > 10
         || !parts[2].bytes().all(|b| b.is_ascii_digit())
         || !value.public_only
         || value.repositories.len() > 8
@@ -17,11 +18,17 @@ pub(super) fn validate(value: &PublicSnapshot) -> Result<()> {
         return Err(Error("invalid_snapshot"));
     }
     reason(&value.reason)?;
+    if value.state == State::Complete && value.reason.is_some() {
+        return Err(Error("inconsistent_snapshot"));
+    }
     let mut names = BTreeSet::new();
     for repository in &value.repositories {
         crate::identifier(&repository.name)?;
         validation::timestamp(&repository.last_updated)?;
         reason(&repository.reason)?;
+        if repository.state == State::Complete && repository.reason.is_some() {
+            return Err(Error("inconsistent_snapshot"));
+        }
         if !names.insert(&repository.name)
             || repository.tags.len() > 8
             || repository.state == State::Unobserved
@@ -43,6 +50,11 @@ pub(super) fn validate(value: &PublicSnapshot) -> Result<()> {
             }
             if let Some(proof) = &tag.oci {
                 validation::digest(&proof.digest)?;
+                if repository.state == State::Complete
+                    && !matches!(proof.state, State::Complete | State::Unobserved)
+                {
+                    return Err(Error("inconsistent_snapshot"));
+                }
                 reason(&proof.reason)?;
                 if proof.registry != REGISTRY
                     || tag.digest.as_ref() != Some(&proof.digest)
