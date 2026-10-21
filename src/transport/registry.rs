@@ -19,14 +19,16 @@ impl Https {
         }
         self.ensure_budget(2)?;
         // Public pull token only. Never forward Hub credentials or follow a challenge-supplied URL.
-        let auth =
-            self.registry_request(self.client.get("https://auth.docker.io/token").query(&[
-                ("service", "registry.docker.io"),
-                (
-                    "scope",
-                    &format!("repository:{namespace}/{repository}:pull"),
-                ),
-            ]))?;
+        let mut token_url = reqwest::Url::parse("https://auth.docker.io/token")
+            .map_err(|_| Error("oci_unavailable"))?;
+        token_url
+            .query_pairs_mut()
+            .append_pair("service", "registry.docker.io")
+            .append_pair(
+                "scope",
+                &format!("repository:{namespace}/{repository}:pull"),
+            );
+        let auth = self.registry_request(self.client.get(token_url))?;
         let auth_bytes = Zeroizing::new(read_body(auth, 16384)?);
         #[derive(serde::Deserialize)]
         struct Token {
