@@ -41,6 +41,12 @@ pub(super) fn validate(value: &PublicSnapshot) -> Result<()> {
         let mut tags = BTreeSet::new();
         for tag in &repository.tags {
             validation::tag(&tag.name)?;
+            reason(&tag.reason)?;
+            if (repository.state == State::Complete && tag.state != State::Complete)
+                || (tag.state == State::Complete && tag.reason.is_some())
+            {
+                return Err(Error("inconsistent_snapshot"));
+            }
             validation::timestamp(&tag.last_updated)?;
             if !tags.insert(&tag.name) {
                 return Err(Error("duplicate_tag"));

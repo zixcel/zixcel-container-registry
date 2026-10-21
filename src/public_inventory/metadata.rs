@@ -1,4 +1,4 @@
-use super::{PublicTag, validation};
+use super::{PublicTag, State, validation};
 use crate::{Error, Result};
 use serde_json::Value;
 pub(super) fn tag(row: &Value) -> Result<PublicTag> {
@@ -17,6 +17,8 @@ pub(super) fn tag(row: &Value) -> Result<PublicTag> {
         _ => return Err(Error("invalid_digest")),
     };
     Ok(PublicTag {
+        state: State::Complete,
+        reason: None,
         name: name.into(),
         digest,
         last_updated: updated.into(),

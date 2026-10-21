@@ -86,6 +86,15 @@ impl<T: Transport> Hub<T> {
                     )
                 });
                 if limits.oci && tag.oci.as_ref().is_none_or(|o| o.state != State::Complete) {
+                    tag.state = tag
+                        .oci
+                        .as_ref()
+                        .map_or(State::Unavailable, |o| o.state.clone());
+                    tag.reason = tag
+                        .oci
+                        .as_ref()
+                        .and_then(|o| o.reason.clone())
+                        .or(Some("oci_digest_unavailable".into()));
                     item.state = State::Partial;
                     item.reason = Some("incomplete_oci_observation".into());
                 }

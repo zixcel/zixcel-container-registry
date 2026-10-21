@@ -29,6 +29,8 @@ pub struct Platform {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct PublicTag {
+    pub state: State,
+    pub reason: Option<String>,
     pub name: String,
     pub digest: Option<String>,
     pub last_updated: String,

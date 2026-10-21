@@ -58,6 +58,14 @@ fn denied_manifest_and_absent_digest_remain_partial_per_tag_observations() {
             .unwrap();
         assert_eq!(s.state, State::Partial);
         assert_eq!(s.repositories[0].state, State::Partial);
+        assert_eq!(
+            s.repositories[0].tags[0].state,
+            if missing {
+                State::Unavailable
+            } else {
+                State::Denied
+            }
+        );
         let proof = &s.repositories[0].tags[0].oci;
         if missing {
             assert!(proof.is_none());
