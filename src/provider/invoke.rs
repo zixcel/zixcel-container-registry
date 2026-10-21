@@ -11,6 +11,9 @@ pub(super) fn invoke(
     binding: &Binding,
     secrets: &mut Vec<String>,
 ) -> Result<Value> {
+    if request.operation.starts_with("docker.snapshot-") {
+        return super::public::invoke(request);
+    }
     let get = |name: &str| {
         request
             .arguments

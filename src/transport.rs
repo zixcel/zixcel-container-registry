@@ -1,4 +1,5 @@
-use crate::{Error, Result};
+use crate::{Error, Result, public_inventory::ManifestReply};
+mod registry;
 use reqwest::{blocking::Client, header::HeaderValue};
 use std::{
     io::Read,
@@ -16,6 +17,9 @@ pub struct Reply {
 pub trait Transport {
     fn request(&mut self, method: Method, path: &str) -> Result<Reply>;
     fn ensure_budget(&self, requests: usize) -> Result<()>;
+    fn manifest(&mut self, _: &str, _: &str, _: &str) -> Result<ManifestReply> {
+        Err(Error("oci_unavailable"))
+    }
 }
 pub struct Https {
     client: Client,
@@ -45,6 +49,14 @@ impl Https {
     }
 }
 impl Transport for Https {
+    fn manifest(
+        &mut self,
+        namespace: &str,
+        repository: &str,
+        digest: &str,
+    ) -> Result<ManifestReply> {
+        self.public_manifest(namespace, repository, digest)
+    }
     fn ensure_budget(&self, requests: usize) -> Result<()> {
         if usize::from(self.remaining) < requests || Instant::now() >= self.deadline {
             return Err(Error("request_budget"));

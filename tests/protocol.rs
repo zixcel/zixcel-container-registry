@@ -5,7 +5,7 @@ use zixcel_container_registry::{manifest, provider::Request};
 fn manifest_and_request_share_exact_write_policy() {
     let m = manifest::manifest().unwrap();
     m.validate().unwrap();
-    assert_eq!(m.commands.len(), 6);
+    assert_eq!(m.commands.len(), 9);
     let write = m
         .commands
         .iter()

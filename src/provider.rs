@@ -4,6 +4,7 @@ use serde_json::{Value, json};
 use std::collections::BTreeMap;
 use zix_operation_contracts::Binding;
 mod invoke;
+mod public;
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Request {

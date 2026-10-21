@@ -20,6 +20,10 @@ jobs:
       sha256: ${{ steps.digest.outputs.sha256 }}
       filename: ${{ steps.digest.outputs.filename }}
     env:
+      CARGO_BUILD_JOBS: '2'
+      CARGO_INCREMENTAL: '0'
+      CARGO_PROFILE_DEV_DEBUG: '0'
+      CARGO_PROFILE_TEST_DEBUG: '0'
       ZIX_RELEASE_SOURCE: ${{ github.sha }}
       RELEASE_PACKAGE: zixcel-container-registry
     steps:
