@@ -6,6 +6,15 @@ fn manifest_and_request_share_exact_write_policy() {
     let m = manifest::manifest().unwrap();
     m.validate().unwrap();
     assert_eq!(m.commands.len(), 9);
+    for command in &m.commands {
+        if command.id.starts_with("docker.snapshot-") {
+            let scope = command.environment.as_ref().expect("explicit public scope");
+            assert!(scope.credential_environment.is_empty());
+            assert!(scope.runtime_environment.is_empty());
+        } else {
+            assert!(command.environment.is_none());
+        }
+    }
     let write = m
         .commands
         .iter()

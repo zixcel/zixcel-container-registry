@@ -364,7 +364,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -542,7 +542,7 @@ dependencies = [
  "gobject-sys",
  "libc",
  "system-deps 9.0.0",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -601,9 +601,9 @@ dependencies = [
 
 [[package]]
 name = "granit-parser"
-version = "1.3.0"
+version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e20f99e46474f56bd905c56e817ebddcf377a611f94c53ac4649e4d3fa3c0cd0"
+checksum = "da55feca5d1625466bae068f9fd4b87892caeae70c3fe671ddb0f50d41aebf37"
 dependencies = [
  "arraydeque",
  "smallvec",
@@ -1154,7 +1154,7 @@ dependencies = [
  "once_cell",
  "socket2",
  "tracing",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -1282,7 +1282,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -1339,7 +1339,7 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "webpki-root-certs",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -1431,9 +1431,9 @@ dependencies = [
 
 [[package]]
 name = "serde-saphyr"
-version = "1.3.0"
+version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b8050abb251097357e24aff63ba2c52a6309ecb7d23a5474023df960a02694d8"
+checksum = "a253edfdea34032da21af84e16fcc94f4c7a6ba237f9f3bc2dbf43cea8535c44"
 dependencies = [
  "annotate-snippets",
  "encoding_rs_io",
@@ -1657,7 +1657,7 @@ dependencies = [
  "getrandom 0.3.4",
  "once_cell",
  "rustix",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -2046,7 +2046,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -2240,8 +2240,8 @@ dependencies = [
 
 [[package]]
 name = "zix-cli"
-version = "0.2.0"
-source = "git+https://github.com/zixcel/cli?rev=f03584c875069187339f164b1c2d684e98b00bc0#f03584c875069187339f164b1c2d684e98b00bc0"
+version = "0.2.4"
+source = "git+https://github.com/zixcel/cli?rev=7fe5789b4beb0948bc58c559de8a560eb8a65794#7fe5789b4beb0948bc58c559de8a560eb8a65794"
 dependencies = [
  "crowsi-process-adapter",
  "rustix",
@@ -2258,7 +2258,7 @@ dependencies = [
 [[package]]
 name = "zix-operation-contracts"
 version = "0.1.0"
-source = "git+https://github.com/zixcel/cli?rev=f03584c875069187339f164b1c2d684e98b00bc0#f03584c875069187339f164b1c2d684e98b00bc0"
+source = "git+https://github.com/zixcel/cli?rev=7fe5789b4beb0948bc58c559de8a560eb8a65794#7fe5789b4beb0948bc58c559de8a560eb8a65794"
 dependencies = [
  "serde",
  "serde_json",
@@ -2277,7 +2277,7 @@ dependencies = [
 
 [[package]]
 name = "zixcel-container-registry"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "crowsi-credential-broker",
  "getrandom 0.4.3",

@@ -95,7 +95,10 @@ Apache-2.0. [Security](SECURITY.md). Daily Dependabot proposes owner-local updat
 
 ## Public inventory and local comparisons
 
-The 0.2 native module adds public-only observations without loading a saved PAT:
+Use native module 0.2.1+ with zix 0.2.4+ for public-only observations.
+These commands explicitly inherit no credentials or DBus session, even when the
+parent shell has a PAT/session. Existing custody operations keep their original
+session requirements. No OS keyring unlock is needed for public inventory:
 
 ```sh
 zix docker snapshot collect --namespace example --maximum-repositories 4 --maximum-tags 4 --maximum-pages 2 --oci true
@@ -116,7 +119,7 @@ Limits are explicit: 1–8 repositories, 1–8 tags per repository, 1–4 pages 
 1 MiB response bodies and 96 KiB snapshots. No retries, polling or redirects are
 performed. A page/record ceiling, denial, unavailable endpoint or malformed row
 is retained as incomplete evidence. Diff withholds every removal unless both
-snapshots have complete membership. `observed_only_after` does not claim when an
+snapshots have complete membership. A removed public identity is not proof of remote deletion; it may have changed visibility. `observed_only_after` does not claim when an
 image was created. An optional public site can consume this same typed projection;
 private names/tags, tokens and local custody references are excluded.
 
