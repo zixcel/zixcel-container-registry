@@ -15,6 +15,7 @@ mod model;
 mod pages;
 mod plan;
 pub mod provider;
+pub mod public_inventory;
 mod transport;
 mod transport_error;
 pub use absence::Absence;

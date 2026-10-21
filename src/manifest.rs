@@ -43,6 +43,40 @@ pub fn manifest() -> Result<Manifest> {
             "description":if effect=="read"{"Bounded Docker Hub observation; planning does not delete."}else{"Operator-approved DELETE; verification_pending requires read-only verify-absent. No replay."},
             "required_permissions":[if effect=="read"{"hub:repository:read"}else{"hub:repository:delete"}],"arguments":args}));
     }
+    for (id, words, required, optional) in [
+        (
+            "snapshot-collect",
+            vec!["snapshot", "collect"],
+            vec![],
+            vec![
+                "maximum-repositories",
+                "maximum-tags",
+                "maximum-pages",
+                "oci",
+            ],
+        ),
+        (
+            "snapshot-show",
+            vec!["snapshot", "show"],
+            vec!["snapshot-file"],
+            vec![],
+        ),
+        (
+            "snapshot-diff",
+            vec!["snapshot", "diff"],
+            vec!["before-file", "after-file"],
+            vec![],
+        ),
+    ] {
+        let mut args = vec![json!({"name":"namespace","required":true,"maximum":100})];
+        for name in required {
+            args.push(json!({"name":name,"required":true,"maximum":2048}));
+        }
+        for name in optional {
+            args.push(json!({"name":name,"required":false,"maximum":5}));
+        }
+        commands.push(json!({"id":format!("docker.{id}"),"words":words,"effect":"read","description":"Public-only bounded snapshot; partial observations never imply full removals.","required_permissions":[],"arguments":args}));
+    }
     let value = json!({"schema":"zix-extension/v2","package":env!("CARGO_PKG_NAME"),"version":env!("CARGO_PKG_VERSION"),"namespace":"docker",
         "platform":"linux-x86_64","protocol":"zix-provider/v1","credential_environment":["ZIX_DOCKER_HUB_TOKEN"],"runtime_environment":["DBUS_SESSION_BUS_ADDRESS"],"timeout_ms":40000,"commands":commands});
     let manifest: Manifest =

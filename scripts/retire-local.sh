@@ -29,7 +29,8 @@ if [[ $# == 5 ]]; then
   [[ $3 == --custody && -z ${ZIX_DOCKER_HUB_TOKEN:-} ]] || exit 2
   "$zix_executable" describe docker --format json | jq -e '
     .runtime_environment == ["DBUS_SESSION_BUS_ADDRESS"] and
-    all(.commands[]; any(.arguments[]; .name == "collection"))
+    ([.commands[] | select(.id == "docker.delete-plan" or .id == "docker.delete-apply" or .id == "docker.verify-absent")]
+      | length == 3 and all(.[]; any(.arguments[]; .name == "collection")))
   ' >/dev/null
   source "$(dirname -- "${BASH_SOURCE[0]}")/custody-session.sh"
   auth=(--username "$4" --collection "$5")

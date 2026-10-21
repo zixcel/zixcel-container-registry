@@ -92,3 +92,47 @@ do not establish real account deletion. A native release is separate from source
 acceptance; do not advertise a source candidate as an available registry package.
 
 Apache-2.0. [Security](SECURITY.md). Daily Dependabot proposes owner-local updates.
+
+## Public inventory and local comparisons
+
+The 0.2 native module adds public-only observations without loading a saved PAT:
+
+```sh
+zix docker snapshot collect --namespace example --maximum-repositories 4 --maximum-tags 4 --maximum-pages 2 --oci true
+zix docker snapshot show --namespace example --snapshot-file /absolute/path/public.json
+zix docker snapshot diff --namespace example --before-file /absolute/path/before.json --after-file /absolute/path/after.json
+```
+
+Save the `result` snapshot object from the first JSON response, rather than its
+protocol envelope. IDs are namespace/repository and namespace/repository:tag.
+Snapshots have an explicit schema, provider version and observation timestamp.
+Show/diff accept the 0.2 format, refuse observations older than 24 hours, future
+clock skew over 60 seconds, reversed comparisons, scope substitutions, duplicate
+identities and unknown fields. A local JSON snapshot is not a signed attestation
+of origin or current visibility.
+
+Limits are explicit: 1–8 repositories, 1–8 tags per repository, 1–4 pages per list,
+100 Hub rows per response, 32 total HTTP requests, a shared 34-second deadline,
+1 MiB response bodies and 96 KiB snapshots. No retries, polling or redirects are
+performed. A page/record ceiling, denial, unavailable endpoint or malformed row
+is retained as incomplete evidence. Diff withholds every removal unless both
+snapshots have complete membership. `observed_only_after` does not claim when an
+image was created. An optional public site can consume this same typed projection;
+private names/tags, tokens and local custody references are excluded.
+
+Hub tag digests are metadata. `--oci true` separately obtains an anonymous,
+repository-scoped pull token from `auth.docker.io` and reads the exact digest at
+`registry-1.docker.io`. It verifies raw bytes, the digest header, media type and
+bounded descriptors/platform declarations. Hub credentials are never forwarded.
+No arbitrary registry/challenge origin, proxy or redirect is accepted. Layers and
+configuration blobs are not downloaded; a single image manifest therefore does
+not establish its execution platform. Index platform declarations do not prove
+image publisher identity, provenance, signature trust or successful execution.
+Missing digests, denied/budget-limited fetches and unsupported manifest shapes
+remain partial/unavailable, never verified by substituting Hub metadata.
+
+Specifications: [Docker Hub namespace API](https://docs.docker.com/reference/api/hub/latest/operations/listNamespaceRepositories/),
+[OCI Distribution](https://github.com/opencontainers/distribution-spec/blob/main/spec.md),
+[OCI descriptors](https://github.com/opencontainers/image-spec/blob/main/descriptor.md).
+Existing authenticated list/get, custody and explicitly approved deletion remain
+separate operations. Inventory never issues DELETE or changes a credential.
