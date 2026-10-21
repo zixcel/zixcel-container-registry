@@ -81,6 +81,9 @@ impl Https {
             )
             .send()
             .map_err(crate::transport_error::classify)?;
+        if matches!(response.status().as_u16(), 401 | 403) {
+            return Err(Error("oci_denied"));
+        }
         if response.status().as_u16() != 200 {
             return Err(Error("oci_unavailable"));
         }

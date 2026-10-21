@@ -1,5 +1,6 @@
 mod collect;
 mod compare;
+mod metadata;
 mod model;
 mod oci;
 mod oci_observation;

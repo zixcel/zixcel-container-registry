@@ -63,7 +63,10 @@ pub(super) fn observe<T: Transport>(
         count = Some(body.count);
         let returned = body.results.len();
         if let Some(next) = &body.next {
-            if returned == 0 || !safe_next(next, path, page + 1) {
+            if returned == 0
+                || out.rows.len() + returned >= body.count
+                || !safe_next(next, path, page + 1)
+            {
                 return out.stop(State::Partial, "unsafe_pagination");
             }
         }

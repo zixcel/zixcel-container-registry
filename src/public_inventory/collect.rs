@@ -1,6 +1,4 @@
-use super::{
-    Limits, PublicRepository, PublicSnapshot, PublicTag, SCHEMA, State, pages, validation,
-};
+use super::{Limits, PublicRepository, PublicSnapshot, SCHEMA, State, pages, validation};
 use crate::{Error, Hub, Result, Transport};
 use std::collections::BTreeSet;
 impl<T: Transport> Hub<T> {
@@ -31,18 +29,27 @@ impl<T: Transport> Hub<T> {
         };
         let mut seen = BTreeSet::new();
         for row in page.rows {
-            let repository = crate::client::decode_repository(
+            let repository = match crate::client::decode_repository(
                 &serde_json::to_vec(&row).map_err(|_| Error("invalid_response"))?,
-            )?;
-            if repository.namespace != namespace || !seen.insert(repository.name.clone()) {
-                return Err(Error("identity_mismatch"));
-            }
+            ) {
+                Ok(r)
+                    if r.namespace == namespace
+                        && seen.insert(r.name.clone())
+                        && validation::timestamp(&r.last_updated).is_ok() =>
+                {
+                    r
+                }
+                _ => {
+                    snapshot.state = State::Partial;
+                    snapshot.reason = Some("invalid_repository_metadata".into());
+                    continue;
+                }
+            };
             if repository.is_private {
                 snapshot.state = State::Partial;
                 snapshot.reason = Some("public_only_filter".into());
                 continue;
             }
-            validation::timestamp(&repository.last_updated)?;
             let tags = pages::observe(
                 self,
                 &format!(
@@ -61,24 +68,15 @@ impl<T: Transport> Hub<T> {
             };
             let mut seen_tags = BTreeSet::new();
             for row in tags.rows {
-                let name = row["name"].as_str().ok_or(Error("invalid_response"))?;
-                validation::tag(name)?;
-                if !seen_tags.insert(name.to_owned()) {
-                    return Err(Error("duplicate_tag"));
-                }
-                let updated = row["last_updated"]
-                    .as_str()
-                    .ok_or(Error("invalid_response"))?;
-                validation::timestamp(updated)?;
-                let digest = match &row["digest"] {
-                    serde_json::Value::Null => None,
-                    serde_json::Value::String(d) => {
-                        validation::digest(d)?;
-                        Some(d.clone())
+                let mut tag = match super::metadata::tag(&row) {
+                    Ok(tag) if seen_tags.insert(tag.name.clone()) => tag,
+                    _ => {
+                        item.state = State::Partial;
+                        item.reason = Some("invalid_tag_metadata".into());
+                        continue;
                     }
-                    _ => return Err(Error("invalid_digest")),
                 };
-                let oci = digest.as_deref().map(|d| {
+                tag.oci = tag.digest.as_deref().map(|d| {
                     super::oci_observation::observe(
                         &mut self.transport,
                         namespace,
@@ -87,12 +85,11 @@ impl<T: Transport> Hub<T> {
                         limits.oci,
                     )
                 });
-                item.tags.push(PublicTag {
-                    name: name.into(),
-                    digest,
-                    last_updated: updated.into(),
-                    oci,
-                });
+                if limits.oci && tag.oci.as_ref().is_none_or(|o| o.state != State::Complete) {
+                    item.state = State::Partial;
+                    item.reason = Some("incomplete_oci_observation".into());
+                }
+                item.tags.push(tag);
             }
             item.tags.sort_by(|a, b| a.name.cmp(&b.name));
             if item.state != State::Complete

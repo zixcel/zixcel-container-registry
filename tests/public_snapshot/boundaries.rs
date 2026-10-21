@@ -35,10 +35,12 @@ fn unsafe_next_identity_duplicate_private_and_bad_dates_are_rejected_or_partial(
         let mut r = repo("one");
         r["last_updated"] = json!(date);
         f.push(Method::Get, REPOS, 200, page(vec![r], None));
-        assert!(
+        assert_ne!(
             Hub::new(f)
                 .public_snapshot("example", 1000, Limits::default())
-                .is_err()
+                .unwrap()
+                .state,
+            State::Complete
         );
     }
     let mut f = Fake::new();

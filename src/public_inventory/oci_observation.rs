@@ -15,7 +15,9 @@ pub(super) fn observe<T: Transport>(
         Err(Error("oci_not_requested"))
     };
     result.unwrap_or_else(|e| ManifestObservation {
-        state: if enabled {
+        state: if e.0 == "oci_denied" {
+            State::Denied
+        } else if enabled {
             State::Unavailable
         } else {
             State::Unobserved
@@ -26,7 +28,8 @@ pub(super) fn observe<T: Transport>(
         platforms: Vec::new(),
         reason: Some(
             match e.0 {
-                "oci_not_requested"
+                "oci_denied"
+                | "oci_not_requested"
                 | "oci_digest_mismatch"
                 | "oci_media_type_mismatch"
                 | "invalid_oci_manifest"
