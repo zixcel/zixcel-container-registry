@@ -26,3 +26,14 @@ fn comparisons_require_schema_scope_versions_order_and_complete_membership() {
         vec!["example/one:latest"]
     );
 }
+
+#[test]
+fn producer_upgrade_retains_previous_snapshot_reads_and_rejects_unreviewed_versions() {
+    let mut value = complete();
+    for version in ["0.2.1", "0.3.0"] {
+        value.provider_version = version.into();
+        assert!(show(&serde_json::to_vec(&value).unwrap(), "example", 1001).is_ok());
+    }
+    value.provider_version = "0.4.0".into();
+    assert!(show(&serde_json::to_vec(&value).unwrap(), "example", 1001).is_err());
+}

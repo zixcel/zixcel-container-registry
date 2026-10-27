@@ -139,3 +139,5 @@ Specifications: [Docker Hub namespace API](https://docs.docker.com/reference/api
 [OCI descriptors](https://github.com/opencontainers/image-spec/blob/main/descriptor.md).
 Existing authenticated list/get, custody and explicitly approved deletion remain
 separate operations. Inventory never issues DELETE or changes a credential.
+
+Native Zix operation discovery and diagnostic handling: [operation guidance](docs/operation-guidance.md).
