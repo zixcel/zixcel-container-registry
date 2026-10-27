@@ -11,7 +11,8 @@ impl<T: Transport> Hub<T> {
         let r = self.transport.request(Method::Get, path)?;
         match r.status {
             200 | 404 => Ok(r),
-            401 | 403 => Err(Error("auth_required")),
+            401 => Err(Error("auth_required")),
+            403 => Err(Error("permission_denied")),
             429 => Err(Error("rate_limited")),
             _ => Err(Error("provider_http_failed")),
         }

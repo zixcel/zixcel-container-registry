@@ -8,7 +8,7 @@ if [[ ( $# != 2 && $# != 5 ) || ! -t 0 ]]; then
 fi
 zix_executable="${ZIX_BIN:-$(command -v zix || true)}"
 if [[ ! -x "$zix_executable" ]]; then
-  echo 'Select an accepted zix 0.2.1+ dispatcher using ZIX_BIN; no implicit installation.' >&2
+  echo 'Select an accepted zix 0.7.0+ dispatcher using ZIX_BIN; no implicit installation.' >&2
   exit 2
 fi
 command -v jq >/dev/null
@@ -49,11 +49,16 @@ plan_sha256="$(jq -er '.result.sha256' "$operation_directory/response.json")"
 printf 'Private deletion plan: %s\n' "$operation_directory/plan.json" >&2
 jq '.plan | {namespace,expires_at,repositories}' "$operation_directory/plan.json"
 printf 'Reviewed plan SHA256 (copy only after checking the targets): %s\n' "$plan_sha256" >&2
+apply_status=0
 "$zix_executable" docker repositories delete apply --namespace "$1" \
   --plan-file "$operation_directory/plan.json" --approval-sha256 "$plan_sha256" \
   --journal-directory "$operation_directory/journal" "${auth[@]}" \
-  > "$operation_directory/result.json"
+  > "$operation_directory/result.json" || apply_status=$?
 state="$(jq -er '.result.state' "$operation_directory/result.json")"
+if [[ "$apply_status" != 0 && !( "$apply_status" == 2 && "$state" == verification_pending ) ]]; then
+  printf 'Unresolved apply result; inspect the retained receipt without replay.\n' >&2
+  exit 2
+fi
 if [[ "$state" == verification_pending ]]; then
   printf 'Deletion acknowledged; waiting for read-only confirmation. No DELETE will be repeated.\n' >&2
   verified=false

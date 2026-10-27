@@ -57,3 +57,10 @@ pub(crate) fn validate_targets(namespace: &str, names: &[String]) -> Result<()> 
     }
     Ok(())
 }
+
+pub fn guidance() -> Result<zix_native_provider::GuidanceCatalog> {
+    zix_native_provider::guidance::catalog(
+        &manifest::manifest()?,
+        include_bytes!("../api/guidance.json"),
+    )
+}

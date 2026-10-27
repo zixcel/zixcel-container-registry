@@ -78,9 +78,10 @@ pub fn manifest() -> Result<Manifest> {
         commands.push(json!({"id":format!("docker.{id}"),"words":words,"effect":"read","description":"Public-only bounded snapshot; partial observations never imply full removals.","required_permissions":[],"arguments":args,"environment":{"credential_environment":[],"runtime_environment":[]}}));
     }
     let value = json!({"schema":"zix-extension/v2","package":env!("CARGO_PKG_NAME"),"version":env!("CARGO_PKG_VERSION"),"namespace":"docker",
-        "platform":"linux-x86_64","protocol":"zix-provider/v1","credential_environment":["ZIX_DOCKER_HUB_TOKEN"],"runtime_environment":["DBUS_SESSION_BUS_ADDRESS"],"timeout_ms":40000,"commands":commands});
-    let manifest: Manifest =
+        "platform":"linux-x86_64","protocol":"zix-provider/v2","credential_environment":["ZIX_DOCKER_HUB_TOKEN"],"runtime_environment":["DBUS_SESSION_BUS_ADDRESS"],"timeout_ms":40000,"commands":commands});
+    let mut manifest: Manifest =
         serde_json::from_value(value).map_err(|_| crate::Error("invalid_manifest"))?;
+    zix_native_provider::guidance::decorate(&mut manifest, include_bytes!("../api/guidance.json"))?;
     manifest.validate()?;
     Ok(manifest)
 }

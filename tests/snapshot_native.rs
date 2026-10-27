@@ -44,9 +44,9 @@ fn installed_provider_reads_and_compares_public_snapshots_without_loading_custod
             json!({"namespace":"example","before-file":file,"after-file":file}),
         ),
     ] {
-        let input = json!({"schema":"zix-provider/v1","id":"a".repeat(32),"operation":operation,"arguments":args,"limits":{"timeout_ms":40000,"maximum_response_bytes":131072},"binding":binding});
+        let input = json!({"schema":"zix-provider/v2","id":"a".repeat(32),"operation":operation,"arguments":args,"limits":{"timeout_ms":40000,"maximum_response_bytes":131072},"binding":binding});
         let mut child = Command::new(exe)
-            .arg("--zix-provider-v1")
+            .arg("--zix-provider-v2")
             .env_clear()
             .env("ZIX_DOCKER_HUB_TOKEN", "SYNTHETIC_TOKEN_NOT_USED")
             .stdin(Stdio::piped())

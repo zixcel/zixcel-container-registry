@@ -7,7 +7,7 @@ pub(super) fn validate(value: &PublicSnapshot) -> Result<()> {
     if value.schema != SCHEMA
         || parts.len() != 3
         || parts[0] != "0"
-        || parts[1] != "2"
+        || !["2", "3"].contains(&parts[1])
         || parts[2].is_empty()
         || parts[2].len() > 10
         || !parts[2].bytes().all(|b| b.is_ascii_digit())
