@@ -18,7 +18,8 @@ case "$1 $2 $3 ${4-}" in
 'docker repositories delete plan')
  printf '%s\n' '{"result":{"sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","plan":{"schema":"zix-local-operation/v1","plan":{"namespace":"example","repositories":[{"repository":{"name":"one"}}]}}}}' ;;
 'docker repositories delete apply')
- printf '%s\n' '{"result":{"state":"verification_pending","accepted":[{"repository":"one","http_status":202}]}}' ;;
+ printf '%s\n' '{"result":{"state":"verification_pending","accepted":[{"repository":"one","http_status":202}]}}'
+ exit 2 ;;
 'docker repositories verify-absent --namespace')
  if [ -e "$TEST_OPERATION_LOG.count" ]; then
   printf '%s\n' '{"result":{"namespace":"example","all_observed_absent":true,"present":[],"observed_absent":["one"]}}'

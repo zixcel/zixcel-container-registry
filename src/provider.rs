@@ -23,7 +23,7 @@ struct Limits {
 }
 impl Request {
     pub fn validate(&self, binding: &Binding) -> Result<()> {
-        if self.schema != "zix-provider/v1"
+        if self.schema != "zix-provider/v2"
             || self.id.len() != 32
             || !self
                 .id
@@ -56,7 +56,7 @@ pub fn run() -> Result<Value> {
     let binding = crate::manifest::binding()?;
     request.validate(&binding)?;
     let mut response =
-        json!({"schema":"zix-provider/v1","id":request.id,"operation":request.operation});
+        json!({"schema":"zix-provider/v2","id":request.id,"operation":request.operation});
     let mut tokens = zeroize::Zeroizing::new(
         std::env::var("ZIX_DOCKER_HUB_TOKEN")
             .ok()
@@ -67,6 +67,14 @@ pub fn run() -> Result<Value> {
         Ok(value) => response["result"] = value,
         Err(error) => response["error"] = json!(error.0),
     }
+    let catalog = crate::guidance()?;
+    let guide = catalog
+        .select(&request.operation, &request.arguments)
+        .ok_or(Error("guidance_operation_missing"))?;
+    response["diagnostic"] = serde_json::to_value(
+        zix_operation_contracts::guidance::Diagnostic::observe(guide.clone(), &response),
+    )
+    .map_err(|_| Error("invalid_diagnostic"))?;
     if zix_cli::response::contains_secret(&response, &tokens) {
         return Err(Error("credential_rejected"));
     }

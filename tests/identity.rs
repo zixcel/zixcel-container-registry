@@ -6,7 +6,7 @@ use zixcel_container_registry::{Hub, Method, identifier};
 fn auth_rate_limit_and_not_found_remain_distinct() {
     for (status, expected) in [
         (401, "auth_required"),
-        (403, "auth_required"),
+        (403, "permission_denied"),
         (429, "rate_limited"),
         (503, "provider_http_failed"),
     ] {

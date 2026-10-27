@@ -25,7 +25,7 @@ pub(crate) fn authorization(
             match response.status().as_u16() {
                 200 => {}
                 401 => return Err(Error("auth_required")),
-                403 => return Err(Error("authentication_forbidden")),
+                403 => return Err(Error("permission_denied")),
                 429 => return Err(Error("rate_limited")),
                 _ => return Err(Error("authentication_http_failed")),
             }

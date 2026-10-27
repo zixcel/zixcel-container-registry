@@ -28,7 +28,7 @@ fn manifest_and_request_share_exact_write_policy() {
         &manifest::catalog().unwrap(),
         &"a".repeat(64),
     );
-    let mut value = json!({"schema":"zix-provider/v1","id":"a".repeat(32),"operation":"docker.list","arguments":{"namespace":"example"},"limits":{"timeout_ms":40000,"maximum_response_bytes":131072},"binding":binding});
+    let mut value = json!({"schema":"zix-provider/v2","id":"a".repeat(32),"operation":"docker.list","arguments":{"namespace":"example"},"limits":{"timeout_ms":40000,"maximum_response_bytes":131072},"binding":binding});
     serde_json::from_value::<Request>(value.clone())
         .unwrap()
         .validate(&binding)
@@ -59,7 +59,7 @@ fn executable_does_not_echo_invalid_credentials_or_raw_protocol_input() {
         process::{Command, Stdio},
     };
     let mut child = Command::new(env!("CARGO_BIN_EXE_zix-docker"))
-        .arg("--zix-provider-v1")
+        .arg("--zix-provider-v2")
         .env("ZIX_DOCKER_HUB_TOKEN", "SYNTHETIC_SECRET_DO_NOT_ECHO")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -91,11 +91,11 @@ fn explicit_custody_rejects_environment_secret_before_connecting_or_echoing() {
         &manifest::catalog().unwrap(),
         &zix_cli::files::digest(&std::fs::read(exe).unwrap()),
     );
-    let value = json!({"schema":"zix-provider/v1","id":"a".repeat(32),"operation":"docker.list",
+    let value = json!({"schema":"zix-provider/v2","id":"a".repeat(32),"operation":"docker.list",
         "arguments":{"namespace":"example","username":"example-user","collection":"default"},
         "limits":{"timeout_ms":40000,"maximum_response_bytes":131072},"binding":binding});
     let mut child = Command::new(exe)
-        .arg("--zix-provider-v1")
+        .arg("--zix-provider-v2")
         .env_clear()
         .env("ZIX_DOCKER_HUB_TOKEN", "SYNTHETIC_DO_NOT_ECHO")
         .stdin(Stdio::piped())

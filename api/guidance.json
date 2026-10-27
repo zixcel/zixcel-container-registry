@@ -1,0 +1,463 @@
+[
+  {
+    "operation": "docker.list",
+    "selectors": {},
+    "intent": "list_selected_namespace_repositories",
+    "keywords": [
+      "DOCKER",
+      "REGISTRY",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://hub.docker.com",
+        "subject": "docker_hub_credential"
+      },
+      {
+        "kind": "provider_permission",
+        "value": "Selected namespace/repository read",
+        "subject": "docker_hub_credential"
+      },
+      {
+        "kind": "context",
+        "value": "Anonymous visibility is partial; username plus PAT explicitly exchanges for a bearer token, while a supplied bearer token is used without username",
+        "subject": "operation"
+      },
+      {
+        "kind": "runtime",
+        "value": "Forwarded local session bus for optional OS custody; collection mode additionally requires the bound username",
+        "subject": "host"
+      },
+      {
+        "kind": "target_scope",
+        "value": "Exact namespace and selected repositories; registry service tokens and Docker Hub API tokens are distinct",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://docs.docker.com/reference/api/hub/latest/"
+    ]
+  },
+  {
+    "operation": "docker.get",
+    "selectors": {},
+    "intent": "read_selected_repository_metadata",
+    "keywords": [
+      "DOCKER",
+      "REGISTRY",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://hub.docker.com",
+        "subject": "docker_hub_credential"
+      },
+      {
+        "kind": "provider_permission",
+        "value": "Selected namespace/repository read",
+        "subject": "docker_hub_credential"
+      },
+      {
+        "kind": "context",
+        "value": "Anonymous visibility is partial; username plus PAT explicitly exchanges for a bearer token, while a supplied bearer token is used without username",
+        "subject": "operation"
+      },
+      {
+        "kind": "runtime",
+        "value": "Forwarded local session bus for optional OS custody; collection mode additionally requires the bound username",
+        "subject": "host"
+      },
+      {
+        "kind": "target_scope",
+        "value": "Exact namespace and selected repositories; registry service tokens and Docker Hub API tokens are distinct",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://docs.docker.com/reference/api/hub/latest/"
+    ]
+  },
+  {
+    "operation": "docker.tags",
+    "selectors": {},
+    "intent": "read_selected_repository_tags",
+    "keywords": [
+      "DOCKER",
+      "REGISTRY",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://hub.docker.com",
+        "subject": "docker_hub_credential"
+      },
+      {
+        "kind": "provider_permission",
+        "value": "Selected namespace/repository read",
+        "subject": "docker_hub_credential"
+      },
+      {
+        "kind": "context",
+        "value": "Anonymous visibility is partial; username plus PAT explicitly exchanges for a bearer token, while a supplied bearer token is used without username",
+        "subject": "operation"
+      },
+      {
+        "kind": "runtime",
+        "value": "Forwarded local session bus for optional OS custody; collection mode additionally requires the bound username",
+        "subject": "host"
+      },
+      {
+        "kind": "target_scope",
+        "value": "Exact namespace and selected repositories; registry service tokens and Docker Hub API tokens are distinct",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://docs.docker.com/reference/api/hub/latest/"
+    ]
+  },
+  {
+    "operation": "docker.verify-absent",
+    "selectors": {},
+    "intent": "observe_original_targets_absence",
+    "keywords": [
+      "DOCKER",
+      "REGISTRY",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://hub.docker.com",
+        "subject": "docker_hub_credential"
+      },
+      {
+        "kind": "provider_permission",
+        "value": "Selected namespace/repository read",
+        "subject": "docker_hub_credential"
+      },
+      {
+        "kind": "context",
+        "value": "Anonymous visibility is partial; username plus PAT explicitly exchanges for a bearer token, while a supplied bearer token is used without username",
+        "subject": "operation"
+      },
+      {
+        "kind": "runtime",
+        "value": "Forwarded local session bus for optional OS custody; collection mode additionally requires the bound username",
+        "subject": "host"
+      },
+      {
+        "kind": "target_scope",
+        "value": "Exact namespace and selected repositories; registry service tokens and Docker Hub API tokens are distinct",
+        "subject": "operation"
+      },
+      {
+        "kind": "context",
+        "value": "Hidden, partial or missing inventory is not deletion proof; keep original targets and observation completeness",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      }
+    ],
+    "documentation": [
+      "https://docs.docker.com/reference/api/hub/latest/"
+    ]
+  },
+  {
+    "operation": "docker.delete-plan",
+    "selectors": {},
+    "intent": "plan_explicit_repository_retirement",
+    "keywords": [
+      "DOCKER",
+      "REGISTRY",
+      "PLAN"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://hub.docker.com",
+        "subject": "docker_hub_credential"
+      },
+      {
+        "kind": "provider_permission",
+        "value": "Selected namespace/repository read",
+        "subject": "docker_hub_credential"
+      },
+      {
+        "kind": "context",
+        "value": "Anonymous visibility is partial; username plus PAT explicitly exchanges for a bearer token, while a supplied bearer token is used without username",
+        "subject": "operation"
+      },
+      {
+        "kind": "runtime",
+        "value": "Forwarded local session bus for optional OS custody; collection mode additionally requires the bound username",
+        "subject": "host"
+      },
+      {
+        "kind": "target_scope",
+        "value": "Exact namespace and selected repositories; registry service tokens and Docker Hub API tokens are distinct",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      },
+      {
+        "namespace": "docker",
+        "operation": "docker.delete-apply",
+        "purpose": "review_operator_retirement",
+        "arguments": {},
+        "on": [
+          "observed"
+        ],
+        "requires_context": {
+          "plan": "reviewed_and_fresh",
+          "operator_authorization": "existing_for_selected_targets"
+        }
+      }
+    ],
+    "documentation": [
+      "https://docs.docker.com/reference/api/hub/latest/"
+    ]
+  },
+  {
+    "operation": "docker.delete-apply",
+    "selectors": {},
+    "intent": "apply_reviewed_one_use_retirement",
+    "keywords": [
+      "DOCKER",
+      "RETIREMENT",
+      "APPLY"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://hub.docker.com",
+        "subject": "docker_hub_credential"
+      },
+      {
+        "kind": "provider_permission",
+        "value": "Selected namespace/repository read and explicitly reviewed delete capability",
+        "subject": "docker_hub_credential"
+      },
+      {
+        "kind": "context",
+        "value": "Anonymous visibility is partial; username plus PAT explicitly exchanges for a bearer token, while a supplied bearer token is used without username",
+        "subject": "operation"
+      },
+      {
+        "kind": "runtime",
+        "value": "Forwarded local session bus for optional OS custody; collection mode additionally requires the bound username",
+        "subject": "host"
+      },
+      {
+        "kind": "target_scope",
+        "value": "Exact namespace and selected repositories; registry service tokens and Docker Hub API tokens are distinct",
+        "subject": "operation"
+      },
+      {
+        "kind": "context",
+        "value": "Fresh plan, exact executable/catalog binding, explicit operator confirmation and one-use journal; read back uncertain effects before a separate new plan",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      },
+      {
+        "namespace": "docker",
+        "operation": "docker.verify-absent",
+        "purpose": "readback_original_retirement_targets",
+        "arguments": {},
+        "on": [
+          "outcome_unknown",
+          "incomplete",
+          "other"
+        ],
+        "requires_context": {
+          "delete_targets": "original_reviewed_plan"
+        }
+      }
+    ],
+    "documentation": [
+      "https://docs.docker.com/reference/api/hub/latest/"
+    ]
+  },
+  {
+    "operation": "docker.snapshot-collect",
+    "selectors": {},
+    "intent": "collect_bounded_public_registry_snapshot",
+    "keywords": [
+      "DOCKER",
+      "PUBLIC",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "audience",
+        "value": "https://hub.docker.com",
+        "subject": "public_endpoint"
+      },
+      {
+        "kind": "target_scope",
+        "value": "Exact namespace and selected repositories; registry service tokens and Docker Hub API tokens are distinct",
+        "subject": "operation"
+      },
+      {
+        "kind": "context",
+        "value": "Public reads only; page and row limits can produce incomplete observations",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [
+      {
+        "namespace": "credential",
+        "operation": "help",
+        "purpose": "inspect_secure_credential_usage",
+        "arguments": {},
+        "on": [
+          "context",
+          "authentication"
+        ]
+      },
+      {
+        "namespace": "docker",
+        "operation": "docker.snapshot-show",
+        "purpose": "inspect_saved_public_snapshot",
+        "arguments": {},
+        "on": [
+          "observed",
+          "incomplete"
+        ],
+        "requires_context": {
+          "snapshot_file": "saved_and_reviewed"
+        }
+      }
+    ],
+    "documentation": [
+      "https://docs.docker.com/reference/api/hub/latest/"
+    ]
+  },
+  {
+    "operation": "docker.snapshot-show",
+    "selectors": {},
+    "intent": "read_local_public_snapshot",
+    "keywords": [
+      "DOCKER",
+      "PUBLIC",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "target_scope",
+        "value": "Exact namespace and selected repositories; registry service tokens and Docker Hub API tokens are distinct",
+        "subject": "operation"
+      },
+      {
+        "kind": "context",
+        "value": "No provider credential or keyring session is requested; local snapshot files remain scoped to their recorded namespace",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [],
+    "documentation": [
+      "https://docs.docker.com/reference/api/hub/latest/"
+    ]
+  },
+  {
+    "operation": "docker.snapshot-diff",
+    "selectors": {},
+    "intent": "compare_local_public_snapshots",
+    "keywords": [
+      "DOCKER",
+      "PUBLIC",
+      "READ"
+    ],
+    "requirements": [
+      {
+        "kind": "target_scope",
+        "value": "Exact namespace and selected repositories; registry service tokens and Docker Hub API tokens are distinct",
+        "subject": "operation"
+      },
+      {
+        "kind": "context",
+        "value": "No provider credential or keyring session is requested; local snapshot files remain scoped to their recorded namespace",
+        "subject": "operation"
+      },
+      {
+        "kind": "context",
+        "value": "Hidden, partial or missing inventory is not deletion proof; keep original targets and observation completeness",
+        "subject": "operation"
+      }
+    ],
+    "next_actions": [],
+    "documentation": [
+      "https://docs.docker.com/reference/api/hub/latest/"
+    ]
+  }
+]
